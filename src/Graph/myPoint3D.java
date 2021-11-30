@@ -3,6 +3,7 @@ package Graph;
 import api.GeoLocation;
 
 public class myPoint3D implements GeoLocation {
+
     @Override
     public double x() {
         return 0;

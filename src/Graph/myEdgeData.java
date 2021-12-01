@@ -1,8 +1,25 @@
 package Graph;
 
 import api.EdgeData;
+import Graph.myNode;
 
 public class myEdgeData implements EdgeData {
+    private int src;
+    private int dest;
+    private double weight;
+    private String info;
+    private int tag;
+
+    public myEdgeData(int src, int dest, double weight, String info, int tag) {
+        this.src = src;
+        this.dest = dest;
+        this.weight = weight;
+        this.info = info;
+        this.tag = tag;
+    }
+
+    public myEdgeData() {
+    }
 
     /**
      * The id of the source node of this edge.
@@ -11,7 +28,7 @@ public class myEdgeData implements EdgeData {
      */
     @Override
     public int getSrc() {
-        return 0;
+        return this.src;
     }
 
     /**
@@ -21,7 +38,7 @@ public class myEdgeData implements EdgeData {
      */
     @Override
     public int getDest() {
-        return 0;
+        return this.dest;
     }
 
     /**
@@ -29,7 +46,7 @@ public class myEdgeData implements EdgeData {
      */
     @Override
     public double getWeight() {
-        return 0;
+        return this.weight;
     }
 
     /**
@@ -39,7 +56,7 @@ public class myEdgeData implements EdgeData {
      */
     @Override
     public String getInfo() {
-        return null;
+        return this.info;
     }
 
     /**
@@ -49,7 +66,7 @@ public class myEdgeData implements EdgeData {
      */
     @Override
     public void setInfo(String s) {
-
+        this.info = s;
     }
 
     /**
@@ -60,7 +77,7 @@ public class myEdgeData implements EdgeData {
      */
     @Override
     public int getTag() {
-        return 0;
+        return this.tag;
     }
 
     /**
@@ -71,6 +88,6 @@ public class myEdgeData implements EdgeData {
      */
     @Override
     public void setTag(int t) {
-
+        this.tag = t;
     }
 }

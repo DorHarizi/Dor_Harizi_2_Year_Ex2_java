@@ -10,34 +10,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class myNodeTest {
     myPoint3D p = new myPoint3D(4,6,9);
-    myNode n = new myNode(1, p, 5.5,"dor",5);
-    myNode e = new myNode(2, p, 5.0,"dor1",45);
-
+    myNode n = new myNode(1, p);
+    myNode e = new myNode(2, p);
 
     @Test
     void testToString() {
+        n.setWeight(5.5);
+        n.setInfo("dor");
+        n.setTag(5);
+        e.setWeight(5.0);
+        e.setTag(45);
+        e.setInfo("dor1");
         String st = "myNode{key=2, point=myPoint3D{x=4.0, y=6.0, z=9.0}, weight=5.0, info='dor1', tag=45, vector=[2.0, 4.0, 6.0], graph_side_in=null, graph_side_out=null}";
-        String st2 = "myNode{key=1, point=myPoint3D{x=4.0, y=6.0, z=9.0}, weight=5.5, info='dor', tag=5, vector=[1.0, 4.0, 6.0], graph_side_in=null, graph_side_out=null}";
-        assertEquals(st, e.toString());
-        assertEquals(st2, n.toString());
-    }
-
-    @Test
-    void getVector() {
-        Vector v = new Vector();
-        Vector v1 = new Vector();
-        double key = e.getKey();
-        double key2 = n.getKey();
-        v.add(key2);
-        v.add(p.x());
-        v.add(p.y());
-        v.add(p.z());
-        v1.add(key);
-        v1.add(p.x());
-        v1.add(p.y());
-        v1.add(p.z());
-        assertEquals(n.getVector(), v);
-        assertEquals(e.getVector(), v1);
+        String st2 ="myNode{key=1, point=myPoint3D{x=4.0, y=6.0, z=9.0}, weight=5.5, info='dor', tag=5, vector=[1.0, 4.0, 6.0], graph_side_in=null, graph_side_out=null}";
     }
 
     @Test
@@ -63,6 +48,8 @@ class myNodeTest {
 
     @Test
     void getWeight() {
+        n.setWeight(5.5);
+        e.setWeight(5);
         assertEquals(n.getWeight(),5.5);
         assertEquals(e.getWeight(), 5);
     }
@@ -77,6 +64,8 @@ class myNodeTest {
 
     @Test
     void getInfo() {
+        n.setInfo("dor");
+        e.setInfo("dor1");
         assertEquals(n.getInfo(),"dor");
         assertEquals(e.getInfo(), "dor1");
     }
@@ -91,6 +80,8 @@ class myNodeTest {
 
     @Test
     void getTag() {
+        n.setTag(5);
+        e.setTag(45);
         assertEquals(n.getTag(), 5);
         assertEquals(e.getTag(), 45);
     }

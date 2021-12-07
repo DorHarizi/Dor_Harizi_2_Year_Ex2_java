@@ -1,7 +1,6 @@
 package Graph;
 
 import api.EdgeData;
-import Graph.myNode;
 
 public class myEdgeData implements EdgeData {
     private int src;
@@ -9,6 +8,14 @@ public class myEdgeData implements EdgeData {
     private double weight;
     private String info;
     private int tag;
+
+    public myEdgeData(int src, int dest, double weight) {
+        this.src = src;
+        this.dest = dest;
+        this.weight = weight;
+        this.info = "";
+        this.tag = 0;
+    }
 
     public myEdgeData(int src, int dest, double weight, String info, int tag) {
         this.src = src;

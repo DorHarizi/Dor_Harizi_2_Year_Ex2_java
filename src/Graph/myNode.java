@@ -2,11 +2,8 @@ package Graph;
 
 import api.GeoLocation;
 import api.NodeData;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Vector;
-import api.EdgeData;
-
-
 
 public class myNode  implements NodeData {
     private int key;
@@ -14,10 +11,18 @@ public class myNode  implements NodeData {
     private double weight;
     private String info;
     private int tag;
-    private Vector<Double> vector;
-    private ArrayList <Vector> graph_side_in;
-    private ArrayList <Vector> graph_side_out;
-    private myEdgeData side;
+    private ArrayList <myNode> vectors_side_in;
+    private ArrayList <myNode> vectors_side_out;
+
+    public myNode(int key, myPoint3D point) {
+        this.key = key;
+        this.point = point;
+        this.weight = 0;
+        this.info = "";
+        this.tag = 0;
+        this.vectors_side_in = null;
+        this.vectors_side_out = null;
+    }
 
     public myNode(int key, myPoint3D point, double weight, String info, int tag) {
         this.key = key;
@@ -25,20 +30,20 @@ public class myNode  implements NodeData {
         this.weight = weight;
         this.info = info;
         this.tag = tag;
-        this.vector = new Vector<>();
-        myPoint3D p = new myPoint3D(point.x(), point.y(), point.z());
-        setVector(p);
     }
+
+    //    public myNode(int key, GeoLocation g) {
+//        this.key = key;
+//        myPoint3D p = new myPoint3D(g.x(), g.y(), g.z());
+//        this.point = p;
+//        this.weight = 0;
+//        this.info = "";
+//        this.tag = 0;
+//        this.vectors_side_in = null;
+//        this.vectors_side_out = null;
+//    }
 
     public myNode() {
-    }
-
-    public void setVector(myPoint3D p) {
-        double key = this.key;
-        this.vector.add(key);
-        this.vector.add(p.x());
-        this.vector.add(p.y());
-        this.vector.add(p.z());
     }
 
     @Override
@@ -49,22 +54,7 @@ public class myNode  implements NodeData {
                 ", weight=" + weight +
                 ", info='" + info + '\'' +
                 ", tag=" + tag +
-                ", vector=" + vector +
-                ", graph_side_in=" + graph_side_in +
-                ", graph_side_out=" + graph_side_out +
                 '}';
-    }
-
-    public Vector getVector() {
-        return vector;
-    }
-
-    public ArrayList<Vector> getGraph_side_in() {
-        return graph_side_in;
-    }
-
-    public ArrayList<Vector> getGraph_side_out() {
-        return graph_side_out;
     }
 
     /**
@@ -75,6 +65,10 @@ public class myNode  implements NodeData {
     @Override
     public int getKey() {
         return this.key;
+    }
+
+    public void setKey(int key) {
+        this.key = key;
     }
 
     /**
@@ -116,7 +110,6 @@ public class myNode  implements NodeData {
     public void setWeight(double w) {
         this.weight = w;
     }
-
     /**
      * Returns the remark (meta data) associated with this node.
      *

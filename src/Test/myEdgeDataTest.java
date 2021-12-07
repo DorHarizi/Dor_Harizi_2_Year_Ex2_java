@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class myEdgeDataTest {
     myEdgeData e = new myEdgeData();
-    myEdgeData p = new myEdgeData(3, 4, 5.5, "dor", 4);
+    myEdgeData p = new myEdgeData(3, 4, 5.5);
     @Test
     void getSrc() {
         assertEquals(p.getSrc(),3);
@@ -27,6 +27,7 @@ class myEdgeDataTest {
 
     @Test
     void getInfo() {
+        p.setInfo("dor");
         assertEquals(p.getInfo(),"dor");
     }
 
@@ -39,6 +40,7 @@ class myEdgeDataTest {
     @Test
     void getTag() {
         assertEquals(e.getTag(),0);
+        p.setTag(4);
         assertEquals(p.getTag(),4);
     }
 

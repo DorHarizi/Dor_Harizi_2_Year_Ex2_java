@@ -8,31 +8,38 @@ import java.util.Vector;
 import java.util.Iterator;
 
 public class myGraph implements DirectedWeightedGraph {
-    private ArrayList <Graph.myNode> vertex_Of_Graph;
-    private HashMap<Vector<Integer>,myEdgeData> edge_Of_Graph;
-    private ArrayList <NodeData> vertices;
-    private ArrayList <EdgeData> edges;
+    private ArrayList <NodeData> vertex_Of_Graph;
+    private HashMap<Vector<Integer>,EdgeData> edge_Of_Graph;
+    private HashMap <Integer, ArrayList <Integer>> neighbors_Of_Vertex_out;
+    private HashMap <Integer, ArrayList <Integer>> neighbors_Of_Vertex_in;
+    private ArrayList<EdgeData> edge_Of_Graph_itr;
+    private int mC;
+    private int modeMc;
 
-    public myGraph(ArrayList<myNode> vertex_Of_Graph, HashMap<Vector<Integer>, myEdgeData> edge_Of_Graph,
-                   ArrayList<NodeData> vertices, ArrayList<EdgeData> edges) {
-        this.vertex_Of_Graph = vertex_Of_Graph;
-        this.edge_Of_Graph = edge_Of_Graph;
-        this.vertices = vertices;
-        this.edges = edges;
+    public myGraph(Stack<NodeData> vertices, Stack <EdgeData> edges) {
+        while(!vertices.isEmpty()){
+            NodeData node = new myNode(vertices.pop());
+            addNode(node);
+        }
+        while(!edges.empty()){
+            EdgeData edge = edges.pop();
+            if(edge.getSrc() != edge.getDest() && this.edge_Of_Graph.containsValue(edge)){
+                connect(edge.getSrc(), edge.getDest(), edge.getWeight());
+            }
+        }
+    }
+
+    public myGraph(ArrayList<NodeData> vertex_of_graph, HashMap<Vector<Integer>, EdgeData> edge_of_graph, HashMap<Integer,
+                    ArrayList<Integer>> neighbors_of_vertex_out, HashMap<Integer,
+                    ArrayList<Integer>> neighbors_of_vertex_in) {
+        this.vertex_Of_Graph = vertex_of_graph;
+        this.edge_Of_Graph = edge_of_graph;
+        this.neighbors_Of_Vertex_out = neighbors_of_vertex_out;
+        this.neighbors_Of_Vertex_in = neighbors_of_vertex_in;
     }
 
     public myGraph() {
     }
-
-    public void addVector(myEdgeData edge){
-        Vector<Integer> vector = new Vector <> (2);
-        int src = edge.getSrc();
-        int dest = edge.getDest();
-        vector.add(src);
-        vector.add(dest);
-        edge_Of_Graph.put(vector,edge);
-    }
-
 
     /**
      * returns the node_data by the node_id,
@@ -42,7 +49,7 @@ public class myGraph implements DirectedWeightedGraph {
      */
     @Override
     public NodeData getNode(int key) {
-        return vertex_Of_Graph.get(key);
+        return this.vertex_Of_Graph.get(key);
     }
 
     /**
@@ -58,24 +65,28 @@ public class myGraph implements DirectedWeightedGraph {
         Vector<Integer> vector = new Vector<>(2);
         vector.add(src);
         vector.add(dest);
-        if(edge_Of_Graph.containsKey(vector)){
-            return edge_Of_Graph.get(vector);
+        if(this.edge_Of_Graph.containsKey(vector)){
+            return this.edge_Of_Graph.get(vector);
         }
-        return null ;
+        return null;
     }
 
     /**
      * adds a new node to the graph with the given node_data.
      * Note: this method should run in O(1) time.
      *
-     * @param n
+     * @param n;
      */
     @Override
     public void addNode(NodeData n) {
-        myNode node = new myNode();
-        node.setLocation(n.getLocation());
-        node.setKey(n.getKey());
-        vertex_Of_Graph.add(node.getKey(),node);
+        if(this.vertex_Of_Graph.get(n.getKey()) == null){
+            this.vertex_Of_Graph.add(n);
+            if(this.modeMc==this.mC){
+                this.mC++; this.modeMc++;
+                return;
+            }
+            this.mC++;
+        }
     }
 
     /**
@@ -88,7 +99,18 @@ public class myGraph implements DirectedWeightedGraph {
      */
     @Override
     public void connect(int src, int dest, double w) {
-        myEdgeData edge = new myEdgeData(src, dest, w);
+        Vector <Integer> vector = new Vector<> (src , dest);
+        if(!this.edge_Of_Graph.containsKey(vector)){
+            EdgeData edge = new myEdgeData(src, dest, w);
+            this.edge_Of_Graph.put(vector, edge);
+            this.neighbors_Of_Vertex_out.get(src).add(dest);
+            this.neighbors_Of_Vertex_in.get(dest).add(src);
+            if(this.modeMc==this.mC){
+                this.mC++; this.modeMc++;
+                return;
+            }
+            this.mC++;
+        }
     }
 
     /**
@@ -100,7 +122,11 @@ public class myGraph implements DirectedWeightedGraph {
      */
     @Override
     public Iterator<NodeData> nodeIter() {
-        return vertices.iterator();
+        if(this.mC != this.modeMc){
+            throw new RuntimeException("The graph was changed since the iterator was constructed");
+        }
+        this.modeMc = 0;
+        return vertex_Of_Graph.iterator();
     }
 
     /**
@@ -111,19 +137,29 @@ public class myGraph implements DirectedWeightedGraph {
      */
     @Override
     public Iterator<EdgeData> edgeIter() {
-        return edges.iterator();
+        if (this.mC != this.modeMc){
+            throw new RuntimeException("The graph was changed since the iterator was constructed");
+        }
+        this.edge_Of_Graph_itr = new ArrayList<>(this.edge_Of_Graph.values());
+        this.modeMc = 0;
+        return this.edge_Of_Graph_itr.iterator();
+
     }
 
     /**
      * This method returns an Iterator for edges getting out of the given node (all the edges starting (source) at the given node).
      * Note: if the graph was changed since the iterator was constructed - a RuntimeException should be thrown.
      *
-     * @param node_id
+     * @param node_id;
      * @return Iterator<EdgeData>
      */
     @Override
     public Iterator<EdgeData> edgeIter(int node_id) {
-        return edges.listIterator(node_id);
+        if(this.modeMc != this.mC){
+            throw new RuntimeException("The graph was changed since the iterator was constructed");
+        }
+        this.modeMc = 0;
+        return this.edge_Of_Graph_itr.listIterator(node_id);
     }
 
     /**
@@ -131,37 +167,41 @@ public class myGraph implements DirectedWeightedGraph {
      * and removes all edges which starts or ends at this node.
      * This method should run in O(k), V.degree=k, as all the edges should be removed.
      *
-     * @param key
+     * @param key;
      * @return the data of the removed node (null if none).
      */
     @Override
     public NodeData removeNode(int key) {
-        if(vertices.get(key) != null){
-            int count1 = 0;
-            int count2 = edges.size();
-            while(-1 < count2 && count1 < edges.size()) {
-                Vector <Integer> v1 = new Vector <> (count2, key);
-                Vector <Integer> v2 = new Vector <> (key, count1);
-                if(edge_Of_Graph.containsKey(v1)){
-                    edges.remove(edge_Of_Graph.get(v1));
-                }
-                if(edge_Of_Graph.containsKey(v2)){
-                    edges.remove(edge_Of_Graph.get(v2));
-                }
-                count1++;
-                count2--;
+        if (this.vertex_Of_Graph.get(key) != null) {
+            NodeData tmp = new myNode(this.vertex_Of_Graph.get(key));
+            this.vertex_Of_Graph.remove(key);
+            int i = 0;
+            int j = 0;
+            while (!this.neighbors_Of_Vertex_out.get(key).isEmpty()) {
+                int dest = this.neighbors_Of_Vertex_out.get(key).get(i);
+                Vector<Integer> vectorIn = new Vector<>(2);
+                vectorIn.add(key);
+                vectorIn.add(dest);
+                this.edge_Of_Graph.remove(vectorIn);
+                this.neighbors_Of_Vertex_out.get(key).remove(i);
+                i++;
             }
-            String info = vertices.get(key).getInfo();
-            double x = vertices.get(key).getLocation().x();
-            double y = vertices.get(key).getLocation().y();
-            double z = vertices.get(key).getLocation().z();
-            myPoint3D g = new myPoint3D(x,y,z);
-            int tag = vertices.get(key).getTag();
-            double w = vertices.get(key).getWeight();
-            NodeData node = new myNode(key,g, w, info, tag);
-            vertices.remove(key);
-            return node;
+            while (!this.neighbors_Of_Vertex_in.get(key).isEmpty()) {
+                int dest = this.neighbors_Of_Vertex_in.get(key).get(j);
+                Vector<Integer> vectorOut = new Vector<>(2);
+                vectorOut.add(dest);
+                vectorOut.add(key);
+                this.edge_Of_Graph.remove(vectorOut);
+                this.neighbors_Of_Vertex_in.get(key).remove(j);
+                j++;
+            }
+            if (this.modeMc == this.mC) {
+                this.mC++;
+                this.modeMc++;
+                return tmp;
+            }
         }
+        this.mC++;
         return null;
     }
 
@@ -169,8 +209,8 @@ public class myGraph implements DirectedWeightedGraph {
      * Deletes the edge from the graph,
      * Note: this method should run in O(1) time.
      *
-     * @param src
-     * @param dest
+     * @param src;
+     * @param dest;
      * @return the data of the removed edge (null if none).
      */
     @Override
@@ -179,12 +219,18 @@ public class myGraph implements DirectedWeightedGraph {
         vector.add(src);
         vector.add(dest);
         if(edge_Of_Graph.containsKey(vector)){
-            String info = edge_Of_Graph.get(vector).getInfo();
-            int tag = edge_Of_Graph.get(vector).getTag();
-            double w = edge_Of_Graph.get(vector).getWeight();
-            EdgeData e = new myEdgeData(src, dest, w, info, tag);
+            EdgeData tmp = new myEdgeData (src, dest, this.edge_Of_Graph.get(vector).getWeight());
             edge_Of_Graph.remove(vector);
-            return e;
+            neighbors_Of_Vertex_out.get(src).remove(dest);
+            neighbors_Of_Vertex_in.get(dest).remove(src);
+            if(this.modeMc==this.mC){
+                this.mC++;
+                this.modeMc++;
+                return tmp;
+            }else{
+                this.mC++;
+                return tmp;
+            }
         }
         return null;
     }
@@ -197,7 +243,7 @@ public class myGraph implements DirectedWeightedGraph {
      */
     @Override
     public int nodeSize() {
-        return vertices.size();
+        return this.vertex_Of_Graph.size();
     }
 
     /**
@@ -208,7 +254,7 @@ public class myGraph implements DirectedWeightedGraph {
      */
     @Override
     public int edgeSize() {
-        return edges.size();
+        return this.edge_Of_Graph.size();
     }
 
     /**
@@ -218,6 +264,6 @@ public class myGraph implements DirectedWeightedGraph {
      */
     @Override
     public int getMC() {
-        return 0;
+        return this.mC;
     }
 }

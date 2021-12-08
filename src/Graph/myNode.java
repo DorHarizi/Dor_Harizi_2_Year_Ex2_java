@@ -2,29 +2,23 @@ package Graph;
 
 import api.GeoLocation;
 import api.NodeData;
-import java.util.*;
-import java.util.Vector;
 
 public class myNode  implements NodeData {
     private int key;
-    private myPoint3D point;
+    private GeoLocation point;
     private double weight;
     private String info;
     private int tag;
-    private ArrayList <myNode> vectors_side_in;
-    private ArrayList <myNode> vectors_side_out;
 
-    public myNode(int key, myPoint3D point) {
+    public myNode(int key, GeoLocation point) {
         this.key = key;
         this.point = point;
         this.weight = 0;
         this.info = "";
         this.tag = 0;
-        this.vectors_side_in = null;
-        this.vectors_side_out = null;
     }
 
-    public myNode(int key, myPoint3D point, double weight, String info, int tag) {
+    public myNode(int key, GeoLocation point, double weight, String info, int tag) {
         this.key = key;
         this.point = point;
         this.weight = weight;
@@ -32,18 +26,16 @@ public class myNode  implements NodeData {
         this.tag = tag;
     }
 
-    //    public myNode(int key, GeoLocation g) {
-//        this.key = key;
-//        myPoint3D p = new myPoint3D(g.x(), g.y(), g.z());
-//        this.point = p;
-//        this.weight = 0;
-//        this.info = "";
-//        this.tag = 0;
-//        this.vectors_side_in = null;
-//        this.vectors_side_out = null;
-//    }
-
     public myNode() {
+    }
+
+    public myNode(NodeData node){
+        this.key = node.getKey();
+        this.point = new myPoint3D(node.getLocation());
+        this.weight = node.getWeight();
+        this.info = node.getInfo();
+        this.tag = node.getTag();
+
     }
 
     @Override
@@ -65,10 +57,6 @@ public class myNode  implements NodeData {
     @Override
     public int getKey() {
         return this.key;
-    }
-
-    public void setKey(int key) {
-        this.key = key;
     }
 
     /**

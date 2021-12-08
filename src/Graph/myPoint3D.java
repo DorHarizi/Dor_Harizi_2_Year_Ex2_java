@@ -6,7 +6,7 @@ public class myPoint3D implements GeoLocation {
     private double x;
     private double y;
     private double z;
-
+    
     public myPoint3D(double x, double y, double z) {
         this.x = x;
         this.y = y;
@@ -14,6 +14,12 @@ public class myPoint3D implements GeoLocation {
     }
 
     public myPoint3D() {
+    }
+
+    public myPoint3D(GeoLocation g){
+        this.x = g.x();
+        this.y = g.y();
+        this.z = g.z();
     }
 
     @Override

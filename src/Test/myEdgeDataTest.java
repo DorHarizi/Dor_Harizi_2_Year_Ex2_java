@@ -1,12 +1,13 @@
 package Test;
 
+import api.EdgeData;
 import org.junit.jupiter.api.Test;
 import Graph.myEdgeData;
 import static org.junit.jupiter.api.Assertions.*;
 
 class myEdgeDataTest {
-    myEdgeData e = new myEdgeData();
-    myEdgeData p = new myEdgeData(3, 4, 5.5);
+    EdgeData e = new myEdgeData();
+    EdgeData p = new myEdgeData(3, 4, 5.5);
     @Test
     void getSrc() {
         assertEquals(p.getSrc(),3);
@@ -48,5 +49,11 @@ class myEdgeDataTest {
     void setTag() {
         e.setTag(4);
         assertEquals(e.getTag(),4);
+    }
+
+    @Test
+    void ob(){
+        assertTrue(e instanceof EdgeData);
+        assertTrue(p instanceof EdgeData);
     }
 }

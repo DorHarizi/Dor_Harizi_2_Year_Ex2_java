@@ -96,7 +96,7 @@ public class myNode  implements NodeData {
      */
     @Override
     public void setWeight(double w) {
-        this.weight = w;
+        this.weight += w;
     }
     /**
      * Returns the remark (meta data) associated with this node.
@@ -115,7 +115,7 @@ public class myNode  implements NodeData {
      */
     @Override
     public void setInfo(String s) {
-        this.info = s;
+        this.info += s;
     }
 
     /**

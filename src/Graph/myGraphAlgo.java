@@ -1,12 +1,21 @@
 package Graph;
 
-import api.DirectedWeightedGraph;
-import api.DirectedWeightedGraphAlgorithms;
-import api.NodeData;
-
-import java.util.List;
+import api.*;
+import Graph.*;
+import java.util.*;
 
 public class myGraphAlgo implements DirectedWeightedGraphAlgorithms {
+    private DirectedWeightedGraph my_graph;
+    private DirectedWeightedGraphAlgorithms my_algo_graph;
+
+    public myGraphAlgo(DirectedWeightedGraph my_graph) {
+        this.my_graph = my_graph;
+        this.my_algo_graph = new myGraphAlgo();
+    }
+
+    public myGraphAlgo() {
+    }
+
     /**
      * Inits the graph on which this set of algorithms operates on.
      *
@@ -14,7 +23,7 @@ public class myGraphAlgo implements DirectedWeightedGraphAlgorithms {
      */
     @Override
     public void init(DirectedWeightedGraph g) {
-
+        my_graph = Objects.requireNonNullElseGet(g, myGraph::new);
     }
 
     /**
@@ -24,7 +33,7 @@ public class myGraphAlgo implements DirectedWeightedGraphAlgorithms {
      */
     @Override
     public DirectedWeightedGraph getGraph() {
-        return null;
+        return this.my_graph;
     }
 
     /**
@@ -45,6 +54,9 @@ public class myGraphAlgo implements DirectedWeightedGraphAlgorithms {
      */
     @Override
     public boolean isConnected() {
+
+
+
         return false;
     }
 

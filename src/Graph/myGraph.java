@@ -58,7 +58,10 @@ public class myGraph implements DirectedWeightedGraph {
      */
     @Override
     public NodeData getNode(int key) {
-        return this.vertex_Of_Graph.get(key);
+        if(this.vertex_Of_Graph.get(key).getKey()== key){
+            return this.vertex_Of_Graph.get(key);
+        }
+        return null;
     }
 
     /**
@@ -89,7 +92,8 @@ public class myGraph implements DirectedWeightedGraph {
     @Override
     public void addNode(NodeData n) {
         if(n != null){
-            this.vertex_Of_Graph.add(n.getKey(),n);
+            NodeData node = new myNode(n);
+            this.vertex_Of_Graph.add(n.getKey(),node);
             if(this.modeMc==this.mC) {
                 this.mC++;
                 this.modeMc++;
@@ -107,7 +111,9 @@ public class myGraph implements DirectedWeightedGraph {
      */
     @Override
     public void connect(int src, int dest, double w) {
-        Vector <Integer> vector = new Vector<> (src , dest);
+        Vector <Integer> vector = new Vector<> (2);
+        vector.add(src);
+        vector.add(dest);
         if(!this.edge_Of_Graph.containsKey(vector)){
             EdgeData edge = new myEdgeData(src, dest, w);
             this.edge_Of_Graph.put(vector, edge);
@@ -115,7 +121,9 @@ public class myGraph implements DirectedWeightedGraph {
             this.vertex_Of_Graph.get(dest).setInfo("("+src+","+dest+"),");
             this.vertex_Of_Graph.get(src).setWeight(w);
             this.vertex_Of_Graph.get(dest).setWeight(w);
+            this.neighbors_Of_Vertex_out.computeIfAbsent(src, k -> new ArrayList<>());
             this.neighbors_Of_Vertex_out.get(src).add(dest);
+            this.neighbors_Of_Vertex_in.computeIfAbsent(dest, k -> new ArrayList<>());
             this.neighbors_Of_Vertex_in.get(dest).add(src);
             if(this.modeMc==this.mC){
                 this.mC++; this.modeMc++;
@@ -167,11 +175,22 @@ public class myGraph implements DirectedWeightedGraph {
      */
     @Override
     public Iterator<EdgeData> edgeIter(int node_id) {
+        ArrayList<EdgeData> edges = new ArrayList<>();
+        if(this.neighbors_Of_Vertex_out.get(node_id) != null){
+            for(int i=0; i<this.neighbors_Of_Vertex_out.get(node_id).size();i++){
+                edges.add(this.getEdge(node_id, this.neighbors_Of_Vertex_out.get(node_id).get(i)));
+            }
+        }
+        if(this.neighbors_Of_Vertex_in.get(node_id) != null){
+            for(int j=0; j<this.neighbors_Of_Vertex_in.get(node_id).size();j++){
+                edges.add(this.getEdge(this.neighbors_Of_Vertex_in.get(node_id).get(j), node_id));
+            }
+        }
         if(this.modeMc != this.mC){
             throw new RuntimeException("The graph was changed since the iterator was constructed");
         }
         this.modeMc = 0;
-        return this.edge_Of_Graph_itr.listIterator(node_id);
+        return edges.iterator();
     }
 
     /**
@@ -184,37 +203,45 @@ public class myGraph implements DirectedWeightedGraph {
      */
     @Override
     public NodeData removeNode(int key) {
-        if (this.vertex_Of_Graph.get(key) != null) {
-            NodeData tmp = new myNode(this.vertex_Of_Graph.get(key));
-            this.vertex_Of_Graph.remove(key);
-            int i = 0;
-            int j = 0;
-            while (!this.neighbors_Of_Vertex_out.get(key).isEmpty()) {
-                int dest = this.neighbors_Of_Vertex_out.get(key).get(i);
-                Vector<Integer> vectorIn = new Vector<>(2);
-                vectorIn.add(key);
-                vectorIn.add(dest);
-                this.edge_Of_Graph.remove(vectorIn);
-                this.neighbors_Of_Vertex_out.get(key).remove(i);
-                i++;
-            }
-            while (!this.neighbors_Of_Vertex_in.get(key).isEmpty()) {
-                int dest = this.neighbors_Of_Vertex_in.get(key).get(j);
-                Vector<Integer> vectorOut = new Vector<>(2);
-                vectorOut.add(dest);
-                vectorOut.add(key);
-                this.edge_Of_Graph.remove(vectorOut);
-                this.neighbors_Of_Vertex_in.get(key).remove(j);
-                j++;
-            }
-            if (this.modeMc == this.mC) {
-                this.mC++;
-                this.modeMc++;
-                return tmp;
+       if (this.vertex_Of_Graph.get(key).getKey() == key) {
+           NodeData tmp = new myNode(this.vertex_Of_Graph.get(key));
+           this.vertex_Of_Graph.remove(key);
+           while (!this.neighbors_Of_Vertex_out.get(key).isEmpty()) {
+               int dest = this.neighbors_Of_Vertex_out.get(key).get(0);
+               Vector<Integer> vectorIn = new Vector<>(2);
+               vectorIn.add(key);
+               vectorIn.add(dest);
+               this.edge_Of_Graph.remove(vectorIn);
+               this.neighbors_Of_Vertex_out.get(key).remove((Integer) dest);
+           }
+           while (!this.neighbors_Of_Vertex_in.get(key).isEmpty()) {
+               int src = this.neighbors_Of_Vertex_in.get(key).get(0);
+               Vector<Integer> vectorOut = new Vector<>(2);
+               vectorOut.add(src);
+               vectorOut.add(key);
+               this.edge_Of_Graph.remove(vectorOut);
+               this.neighbors_Of_Vertex_in.get(key).remove((Integer) src);
+           }
+           if (this.modeMc == this.mC) {
+               this.mC++;
+               this.modeMc++;
+               return tmp;
+           }
+       }
+
+       this.mC++;
+       return null;
+    }
+
+    private int index(int key){
+        int index = 0;
+        for(int i=0; i < this.vertex_Of_Graph.size(); i++){
+            if(this.vertex_Of_Graph.get(i).getKey() == key){
+                index = i;
             }
         }
-        this.mC++;
-        return null;
+
+        return index;
     }
 
     /**
@@ -230,13 +257,13 @@ public class myGraph implements DirectedWeightedGraph {
         Vector<Integer> vector = new Vector<>(2);
         vector.add(src);
         vector.add(dest);
-        if(edge_Of_Graph.containsKey(vector)){
+        if(this.edge_Of_Graph.containsKey(vector)){
             EdgeData tmp = new myEdgeData (src, dest, this.edge_Of_Graph.get(vector).getWeight());
-            edge_Of_Graph.remove(vector);
-            neighbors_Of_Vertex_out.get(src).remove(dest);
-            neighbors_Of_Vertex_in.get(dest).remove(src);
-            vertex_Of_Graph.get(src).getInfo().replaceAll("("+src+","+dest+")","");
-            vertex_Of_Graph.get(dest).getInfo().replaceAll("("+src+","+dest+")","");
+            this.edge_Of_Graph.remove(vector);
+            this.neighbors_Of_Vertex_out.get(src).remove((Integer) dest);
+            this.neighbors_Of_Vertex_in.get(dest).remove((Integer) src);
+            this.vertex_Of_Graph.get(src).getInfo().replaceAll("("+src+","+dest+")","");
+            this.vertex_Of_Graph.get(dest).getInfo().replaceAll("("+src+","+dest+")","");
             if(this.modeMc==this.mC){
                 this.mC++;
                 this.modeMc++;

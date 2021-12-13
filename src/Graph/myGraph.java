@@ -15,6 +15,14 @@ public class myGraph implements DirectedWeightedGraph {
     private ArrayList<EdgeData> edge_Of_Graph_itr;
     private int modeMc;
 
+    public myGraph(myGraph g) {
+        this.vertex_Of_Graph = g.vertex_Of_Graph;
+        this.edge_Of_Graph = g.edge_Of_Graph;
+        this.neighbors_Of_Vertex_out = g.neighbors_Of_Vertex_out;
+        this.neighbors_Of_Vertex_in = g.neighbors_Of_Vertex_in;
+        this.edge_Of_Graph_itr = g.edge_Of_Graph_itr;
+    }
+
 
     public myGraph(){
         this.vertex_Of_Graph = new ArrayList<>();
@@ -22,6 +30,22 @@ public class myGraph implements DirectedWeightedGraph {
         this.neighbors_Of_Vertex_in = new HashMap<>();
         this.neighbors_Of_Vertex_out = new HashMap<>();
         this.modeMc = 0;
+    }
+
+    public ArrayList<NodeData> getVertex_Of_Graph() {
+        return vertex_Of_Graph;
+    }
+
+    public HashMap<Vector<Integer>, EdgeData> getEdge_Of_Graph() {
+        return edge_Of_Graph;
+    }
+
+    public HashMap<Integer, ArrayList<Integer>> getNeighbors_Of_Vertex_out() {
+        return neighbors_Of_Vertex_out;
+    }
+
+    public HashMap<Integer, ArrayList<Integer>> getNeighbors_Of_Vertex_in() {
+        return neighbors_Of_Vertex_in;
     }
 
     /**
@@ -112,7 +136,6 @@ public class myGraph implements DirectedWeightedGraph {
         Iterator <NodeData> iterator_verties = new Iterator<>() {
             private final Iterator<NodeData> inter = vertex_Of_Graph.iterator();
             private  int Mc = modeMc;
-            private NodeData current;
 
             @Override
             public boolean hasNext() {
@@ -127,7 +150,7 @@ public class myGraph implements DirectedWeightedGraph {
                 if(this.Mc != modeMc){
                     throw new RuntimeException("the graph was changed since the iterator was constructed");
                 }
-                current = inter.next();
+                NodeData current = inter.next();
                 return current;
             }
             public void remove(){
@@ -153,7 +176,6 @@ public class myGraph implements DirectedWeightedGraph {
         Iterator<EdgeData> iterator_edges = new Iterator<>() {
             private final Iterator<EdgeData> inter = edge_Of_Graph_itr.iterator();
             private int Mc = modeMc;
-            private EdgeData current;
 
             @Override
             public boolean hasNext() {
@@ -168,7 +190,7 @@ public class myGraph implements DirectedWeightedGraph {
                 if (this.Mc != modeMc) {
                     throw new RuntimeException("the graph was changed since the iterator was constructed");
                 }
-                current = inter.next();
+                EdgeData current = inter.next();
                 return current;
             }
 
@@ -209,7 +231,6 @@ public class myGraph implements DirectedWeightedGraph {
         Iterator<EdgeData> iterator_edges_of_vertex = new Iterator<>() {
             private final Iterator<EdgeData> inter = edges.iterator();
             private int Mc = modeMc;
-            private EdgeData current;
 
             @Override
             public boolean hasNext() {
@@ -224,7 +245,7 @@ public class myGraph implements DirectedWeightedGraph {
                 if (this.Mc != modeMc) {
                     throw new RuntimeException("the graph was changed since the iterator was constructed");
                 }
-                current = inter.next();
+                EdgeData current = inter.next();
                 return current;
             }
 
@@ -290,7 +311,12 @@ public class myGraph implements DirectedWeightedGraph {
         vector.add(src);
         vector.add(dest);
         if(this.edge_Of_Graph.containsKey(vector)){
-            EdgeData tmp = new myEdgeData (src, dest, this.edge_Of_Graph.get(vector).getWeight());
+            double tmp1 = this.edge_Of_Graph.get(vector).getWeight();
+            double w1 = this.vertex_Of_Graph.get(src).getWeight() - tmp1;
+            double w2 = this.vertex_Of_Graph.get(dest).getWeight() - tmp1;
+            this.vertex_Of_Graph.get(src).setWeight(w1);
+            this.vertex_Of_Graph.get(dest).setWeight(w2);
+            EdgeData tmp = new myEdgeData (src, dest, tmp1);
             this.edge_Of_Graph.remove(vector);
             this.neighbors_Of_Vertex_out.get(src).remove((Integer) dest);
             this.neighbors_Of_Vertex_in.get(dest).remove((Integer) src);
@@ -338,11 +364,10 @@ public class myGraph implements DirectedWeightedGraph {
     public String toString() {
         return "myGraph{" +
                 "vertex_Of_Graph=" + vertex_Of_Graph +
-                ", edge_Of_Graph=" + edge_Of_Graph +
-                ", neighbors_Of_Vertex_out=" + neighbors_Of_Vertex_out +
-                ", neighbors_Of_Vertex_in=" + neighbors_Of_Vertex_in +
-                ", edge_Of_Graph_itr=" + edge_Of_Graph_itr +
-                ", modeMc=" + modeMc +
+                "\n edge_Of_Graph=" + edge_Of_Graph +
+                "\n neighbors_Of_Vertex_out=" + neighbors_Of_Vertex_out +
+                "\n neighbors_Of_Vertex_in=" + neighbors_Of_Vertex_in +
+                "\n modeMc=" + modeMc +
                 '}';
     }
 

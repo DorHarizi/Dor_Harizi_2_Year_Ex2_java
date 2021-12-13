@@ -9,17 +9,6 @@ public class myEdgeData implements EdgeData {
     private String info;
     private int tag;
 
-    @Override
-    public String toString() {
-        return "myEdgeData{" +
-                "src=" + src +
-                ", dest=" + dest +
-                ", weight=" + weight +
-                ", info='" + info + '\'' +
-                ", tag=" + tag +
-                '}';
-    }
-
     public myEdgeData(int src, int dest, double weight) {
         this.src = src;
         this.dest = dest;
@@ -107,5 +96,16 @@ public class myEdgeData implements EdgeData {
     @Override
     public void setTag(int t) {
         this.tag = t;
+    }
+
+    @Override
+    public String toString() {
+        return "myEdgeData{" +
+                "src=" + src +
+                ", dest=" + dest +
+                ", weight=" + weight +
+                ", info='" + info + '\'' +
+                ", tag=" + tag +
+                '}';
     }
 }

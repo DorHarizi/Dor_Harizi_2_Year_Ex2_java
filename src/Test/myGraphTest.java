@@ -966,10 +966,6 @@ class myGraphTest {
         dor.connect(src79, dest79, w79);
         int r = (int) (Math.random() * (79));
         dor.edgeIter(r);
-//        check if the Exception work;
-//        for(int i=0; i<80;i++){
-//            dor.edgeIter(i);
-//        }
     }
 
     @Test

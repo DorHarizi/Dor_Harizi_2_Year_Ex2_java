@@ -1,0 +1,128 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+
+
+myGraph<|--myNode
+myGraph<|--myEdgeData
+myGraphAlgo<|--myGraph
+myNode<|--myPoint3D
+
+
+
+class myNode {
+private int key;
+    private GeoLocation point;
+    private double weight;
+    private String info;
+    private int tag;
+
+    public myNode(int key, double x, double y, double z);
+    public myNode(int key, GeoLocation point);
+     public myNode(int key, GeoLocation point, double weight, String info, int tag);
+     public myNode();
+     public String toString();
+     public int getKey();
+     public GeoLocation getLocation();
+      public void setLocation(GeoLocation p);
+      public void setWeight(double w);
+      public double getWeight();
+        public String getInfo();
+        public void setInfo(String s);
+          public int getTag();
+          public void setTag(int t);
+}
+
+class myPoint3D{
+  private double x;
+    private double y;
+    private double z;
+     public myPoint3D(double x, double y, double z);
+     public myPoint3D() ;
+      public myPoint3D(GeoLocation g);
+      public double x();
+      public double y();
+      public double z();
+       public double distance(GeoLocation g);
+       public String toString();
+}
+
+class myEdgeData{
+    private int src;
+    private int dest;
+    private double weight;
+    private String info;
+    private int tag;
+
+    public myEdgeData(int src, int dest, double weight);
+     public myEdgeData();
+       public int getSrc();
+         public int getDest();
+          public double getWeight();
+            public String getInfo();
+        public void setInfo(String s);
+          public int getTag();
+          public void setTag(int t);
+            public String toString();
+}
+
+class myGraph{
+private ArrayList <NodeData> vertex_Of_Graph;
+    private HashMap<Vector<Integer>,EdgeData> edge_Of_Graph;
+    private HashMap <Integer, ArrayList <Integer>> neighbors_Of_Vertex_out;
+    private HashMap <Integer, ArrayList <Integer>> neighbors_Of_Vertex_in;
+    private ArrayList<EdgeData> edge_Of_Graph_itr;
+    private int modeMc;
+
+     public myGraph(myGraph g);
+        public myGraph();
+         public ArrayList<NodeData> getVertex_Of_Graph();
+          public HashMap<Integer, ArrayList<Integer>> getNeighbors_Of_Vertex_out();
+           public HashMap<Integer, ArrayList<Integer>> getNeighbors_Of_Vertex_in();
+            public NodeData getNode(int key) ;
+              public EdgeData getEdge(int src, int dest);
+              public void addNode(NodeData n);
+               public void connect(int src, int dest, double w);
+                 public Iterator<NodeData> nodeIter();
+                 public Iterator<EdgeData> edgeIter();
+                 public Iterator<EdgeData> edgeIter(int node_id) ;
+                  public NodeData removeNode(int key);
+                  public EdgeData removeEdge(int src, int dest);
+                  public int nodeSize();
+                   public int edgeSize();
+                    public int getMC();
+                    public String toString();
+}
+
+class myGraphAlgo{
+    private myGraph my_Graph_Algo;
+    private int myMc;
+    private boolean isConnected;
+
+    public myGraphAlgo();
+     public void init(DirectedWeightedGraph g) ;
+      public DirectedWeightedGraph getGraph() ;
+       public DirectedWeightedGraph copy() ;
+        public boolean isConnected();
+        public double shortestPathDist(int src, int dest);
+        public List<NodeData> shortestPath(int src, int dest);
+        private ArrayList<Integer> Neighbors(int src, ArrayList<Integer> srcArray, int dest, ArrayList<Integer> destArray, ArrayList<Integer> visited);
+          private ArrayList<Integer> checkNeighbors(int src, ArrayList<Integer> srcArray, int dest, ArrayList<Integer> destArray, ArrayList<Integer> visited) ;
+        public NodeData center() ;
+         public List<NodeData> tsp(List<NodeData> cities);
+           public boolean save(String file);
+            public boolean load(String file);
+             public String toString() ;
+              private Stack<Integer> inRoute( Stack<Integer> visited, ArrayList<Integer> srcOutArray);
+              private Vector<Double> average();
+                public double getWightTotal(int key, ArrayList<Integer> visited, double totalWight );
+
+
+
+
+
+}
+
+
+@enduml

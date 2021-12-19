@@ -36,9 +36,6 @@ public class myGraph implements DirectedWeightedGraph {
         return vertex_Of_Graph;
     }
 
-    public HashMap<Vector<Integer>, EdgeData> getEdge_Of_Graph() {
-        return edge_Of_Graph;
-    }
 
     public HashMap<Integer, ArrayList<Integer>> getNeighbors_Of_Vertex_out() {
         return neighbors_Of_Vertex_out;

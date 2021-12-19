@@ -15,8 +15,5 @@ public class main {
         frame.getContentPane().setLayout(new BorderLayout());
         frame.setBackground(Color.red);
         frame.setVisible(true);
-
-
-
     }
 }

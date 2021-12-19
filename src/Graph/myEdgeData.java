@@ -17,14 +17,6 @@ public class myEdgeData implements EdgeData {
         this.tag = 0;
     }
 
-    public myEdgeData(int src, int dest, double weight, String info, int tag) {
-        this.src = src;
-        this.dest = dest;
-        this.weight = weight;
-        this.info = info;
-        this.tag = tag;
-    }
-
     public myEdgeData() {
     }
 

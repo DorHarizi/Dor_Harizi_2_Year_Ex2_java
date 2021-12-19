@@ -1,60 +1,48 @@
 package Graph;
 
-import api.*;
+import api.DirectedWeightedGraph;
+import api.DirectedWeightedGraphAlgorithms;
+import api.EdgeData;
+import api.NodeData;
+import com.google.gson.Gson;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.w3c.dom.Node;
 
-import javax.lang.model.type.NullType;
+import java.io.*;
 import java.util.*;
 
 public class myGraphAlgo implements DirectedWeightedGraphAlgorithms {
     private myGraph my_Graph_Algo;
-    int myMc;
+    private int myMc;
+    private boolean isConnected;
 
     public myGraphAlgo() {
     }
 
-    /**
-     * Inits the graph on which this set of algorithms operates on.
-     *
-     * @param g
-     */
     @Override
     public void init(DirectedWeightedGraph g) {
         if (g != null) {
             this.myMc = g.getMC();
             this.my_Graph_Algo = new myGraph((myGraph) g);
+            this.isConnected = isConnected();
             return;
         }
-        assert false;
-        this.myMc = g.getMC();
         this.my_Graph_Algo = new myGraph();
     }
 
-    /**
-     * Returns the underlying graph of which this class works.
-     *
-     * @return
-     */
     @Override
     public DirectedWeightedGraph getGraph() {
         return this.my_Graph_Algo;
     }
 
-    /**
-     * Computes a deep copy of this weighted graph.
-     *
-     * @return
-     */
     @Override
     public DirectedWeightedGraph copy() {
         return new myGraph(this.my_Graph_Algo);
     }
 
-    /**
-     * Returns true if and only if (iff) there is a valid path from each node to each
-     * other node. NOTE: assume directional graph (all n*(n-1) ordered pairs).
-     *
-     * @return
-     */
     @Override
     public boolean isConnected() {
         int size = this.my_Graph_Algo.nodeSize() * (this.my_Graph_Algo.nodeSize() - 1);
@@ -81,246 +69,428 @@ public class myGraphAlgo implements DirectedWeightedGraphAlgorithms {
         return true;
     }
 
-    /**
-     * Computes the length of the shortest path between src to dest
-     * Note: if no such path --> returns -1
-     *
-     * @param src  - start node
-     * @param dest - end (target) node
-     * @return
-     */
     @Override
     public double shortestPathDist(int src, int dest) {
-        List<NodeData> tmp;
-        tmp = shortestPath(src, dest);
-        double sumWight = 0;
-        for(NodeData i : tmp){
-            sumWight += i.getWeight();
+        List<NodeData> shortestPath = shortestPath(src, dest);
+        double sumWight = 0.0;
+        if (shortestPath != null) {
+            if (shortestPath.size() % 2 == 0) {
+                for (int i = 1; i < shortestPath.size(); i++) {
+                    int srcTmp = shortestPath.get(i).getKey();
+                    int destTmp = shortestPath.get(i - 1).getKey();
+                    EdgeData edgeTmp = this.my_Graph_Algo.getEdge(srcTmp, destTmp);
+                    if (edgeTmp != null) {
+                        sumWight += edgeTmp.getWeight();
+                    }
+                }
+                return sumWight;
+            }
+            for (int i = 0; i < shortestPath.size() - 1; i++) {
+                int srcTmp = shortestPath.get(i + 1).getKey();
+                int destTmp = shortestPath.get(i).getKey();
+                EdgeData edgeTmp = this.my_Graph_Algo.getEdge(srcTmp, destTmp);
+                if (edgeTmp != null) {
+                    sumWight += edgeTmp.getWeight();
+                }
+            }
+            return sumWight;
         }
         return sumWight;
     }
 
-
-    /**
-     * Computes the the shortest path between src to dest - as an ordered List of nodes:
-     * src--> n1-->n2-->...dest
-     * see: https://en.wikipedia.org/wiki/Shortest_path_problem
-     * Note if no such path --> returns null;
-     *
-     * @param src  - start node
-     * @param dest - end (target) node
-     * @return
-     */
     @Override
     public List<NodeData> shortestPath(int src, int dest) {
-        int index = 0;
-        if((!this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(src).isEmpty()) || (!this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(dest).isEmpty())){
-            ArrayList <ArrayList<NodeData>> minRouteNodes = new ArrayList<>();
-            if(this.my_Graph_Algo.getEdge(src, dest) != null){
-                ArrayList <NodeData> tmp = new ArrayList<>();
-                tmp.add(this.my_Graph_Algo.getNode(src));
-                tmp.add(this.my_Graph_Algo.getNode(dest));
-                minRouteNodes.add(tmp);
-                index++;
-            }
-            if(!((this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(src).size()-1 == 0) || (this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(dest).contains(src)))){
-                for(int i : this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(src)){
-                    if(i != dest){
-                        ArrayList <NodeData> visited = new ArrayList<>();
-                        ArrayList <NodeData> tmp;
-                        visited.add(this.my_Graph_Algo.getNode(src));
-                        visited.add(this.my_Graph_Algo.getNode(dest));
-                        ArrayList<Integer> srcTmpArray = this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(i);
-                        visited.add(this.my_Graph_Algo.getNode(i));
-                        tmp = outRoute(visited, srcTmpArray);
-                        tmp.remove(1);
-                        minRouteNodes.add(index, new ArrayList<>(tmp));
-                        tmp.clear();
-                        index++;
-                    }else{
-                        minRouteNodes.get(index).add(this.my_Graph_Algo.getNode(src));
-                        minRouteNodes.get(index).add(this.my_Graph_Algo.getNode(i));
-                        minRouteNodes.get(index).add(this.my_Graph_Algo.getNode(dest));
-                        index++;
+        List<NodeData> shortestPath = new ArrayList<>();
+        if ((this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(dest) != null) && (this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(src) != null)) {
+            ArrayList<Integer> destArray = this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(dest);
+            if (!destArray.contains(src)) {
+                ArrayList<Integer> srcArray = this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(src);
+                ArrayList<ArrayList<Integer>> shortestRoutesOptions = new ArrayList<>();
+                int minSize = Integer.MAX_VALUE;
+                int minIndex = -1;
+                int index = 0;
+                for (int i : destArray) {
+                    if (this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(i) != null) {
+                        ArrayList<Integer> visited = new ArrayList<>();
+                        visited.add(dest);
+                        ArrayList<Integer> tmp = Neighbors(src, srcArray, i, destArray, visited);
+                        if (tmp != null) {
+                            tmp.add(src);
+                            if (tmp.size() < minSize && tmp.size() != 1) {
+                                minSize = tmp.size();
+                                minIndex = index;
+                            }
+                            shortestRoutesOptions.add(index, tmp);
+                            index++;
+                        }
                     }
                 }
-                List<NodeData> shortestPath;
-                int result = Integer.MAX_VALUE;
-                int i = 0;
-                for (ArrayList<NodeData> minRouteNode : minRouteNodes) {
-                    int size = minRouteNode.size();
-                    if (size < result) {
-                        result = size;
-                        i = minRouteNodes.indexOf(minRouteNode);
+                if (index != 0) {
+                    ArrayList<Integer> result = shortestRoutesOptions.get(minIndex);
+                    for (int j : result) {
+                        if (!shortestPath.contains(this.my_Graph_Algo.getNode(j))) {
+                            shortestPath.add(this.my_Graph_Algo.getNode(j));
+                        }
                     }
+                    return shortestPath;
                 }
-                shortestPath = new ArrayList<>(minRouteNodes.get(i));
-                return shortestPath;
+                return null;
             }
-            List<NodeData> tmp;
-            tmp = new ArrayList<>(minRouteNodes.get(index));
-            return tmp;
+            shortestPath.add(this.my_Graph_Algo.getNode(src));
+            shortestPath.add(this.my_Graph_Algo.getNode(dest));
+            return shortestPath;
         }
         return null;
     }
 
-
-    private ArrayList<NodeData> outRoute( ArrayList<NodeData> visited, ArrayList<Integer> srcOutArray) {
-        if(visited.size() <= this.my_Graph_Algo.nodeSize()){
-            for(int i : srcOutArray){
-                if(!(visited.contains(this.my_Graph_Algo.getNode(i)))){
-                    if(this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(i).contains(visited.get(1).getKey())){
-                        visited.add(this.my_Graph_Algo.getNode(i));
-                        visited.add(this.my_Graph_Algo.getNode(visited.get(1).getKey()));
-                        return visited;
-                    }
-                    visited.add(this.my_Graph_Algo.getNode(i));
-                    visited = outRoute(visited, this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(i));
-                    return visited;
-                }
-                if((i == visited.get(1).getKey())){
-                    visited.add(this.my_Graph_Algo.getNode(i));
+    private ArrayList<Integer> Neighbors(int src, ArrayList<Integer> srcArray, int dest, ArrayList<Integer> destArray, ArrayList<Integer> visited) {
+        if (this.isConnected) {
+            if ((destArray.contains(src))) {
+                visited.add(dest);
+                return visited;
+            }
+            for (int i : srcArray) {
+                if (destArray.contains(i)) {
+                    visited.add(i);
                     return visited;
                 }
             }
+            visited.add(dest);
+            int index = destArray.indexOf(dest);
+            if (index + 1 < destArray.size()) {
+                int dest1 = destArray.get(index + 1);
+                ArrayList<Integer> destArray1 = this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(dest);
+                ArrayList<Integer> tmp = checkNeighbors(src, srcArray, dest1, destArray1, visited);
+                if (tmp != null) {
+                    return tmp;
+                }
+            }
+            return null;
         }
-        return visited;
+        if (visited.size() < this.my_Graph_Algo.nodeSize()) {
+            if ((destArray.contains(src))) {
+                visited.add(dest);
+                return visited;
+            }
+            for (int i : srcArray) {
+                if (destArray.contains(i)) {
+                    visited.add(dest);
+                    visited.add(i);
+                    return visited;
+                }
+            }
+            visited.add(dest);
+            int index = destArray.indexOf(dest);
+            if (index + 1 < destArray.size()) {
+                int dest1 = destArray.get(index + 1);
+                ArrayList<Integer> destArray1 = this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(dest);
+                ArrayList<Integer> tmp = checkNeighbors(src, srcArray, dest1, destArray1, visited);
+                if (tmp != null) {
+                    return tmp;
+                }
+            }
+            return null;
+        }
+        return null;
     }
 
-    /**
-     * Finds the NodeData which minimizes the max distance to all the other nodes.
-     * Assuming the graph isConnected, elese return null. See: https://en.wikipedia.org/wiki/Graph_center
-     *
-     * @return the Node data to which the max shortest path to all the other nodes is minimized.
-     */
+    private ArrayList<Integer> checkNeighbors(int src, ArrayList<Integer> srcArray, int dest, ArrayList<Integer> destArray, ArrayList<Integer> visited) {
+        if (this.isConnected) {
+            if ((visited.size() < this.my_Graph_Algo.nodeSize())) {
+                for (int i : destArray) {
+                    ArrayList<Integer> dest2Array = this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(i);
+                    for (int j : srcArray) {
+                        if (dest2Array.contains(j) || i == src) {
+                            return Neighbors(src, srcArray, i, dest2Array, visited);
+                        }
+                    }
+                }
+                return Neighbors(src, srcArray, dest, destArray, visited);
+            }
+            return null;
+        }
+        for (int i : destArray) {
+            ArrayList<Integer> dest2Array = this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(i);
+            for (int j : srcArray) {
+                if (dest2Array.contains(j) || i == src) {
+                    return Neighbors(src, srcArray, i, dest2Array, visited);
+                }
+            }
+        }
+        return Neighbors(src, srcArray, dest, destArray, visited);
+    }
+
+
     @Override
     public NodeData center() {
-        return null;
+        int index = -1;
+        double maxWight = Double.MAX_VALUE;
+        double tmp;
+        for(int i =0; i<this.my_Graph_Algo.nodeSize();i++){
+            ArrayList<Integer> visited = new ArrayList<>();
+            double totalWight = this.my_Graph_Algo.getNode(i).getWeight();
+            tmp = getWightTotal(i, visited, totalWight);
+            if(tmp < maxWight ){
+                index = i;
+                maxWight = tmp;
+            }
+        }
+
+//        int maxIndexWight = -1;
+//        double maxWight = Double.MIN_VALUE;
+//        int maxIndexEdges = -1;
+//        int edgeInIndex = 1;
+//        int edgeOutIndex = 1;
+//        ArrayList<Integer> doublesWithSameSumEdges = new ArrayList<>();
+//        ArrayList<Integer> doublesWithSameSumWight = new ArrayList<>();
+//        for(int i=0; i <this.my_Graph_Algo.nodeSize(); i++){
+//            if(maxWight <= this.my_Graph_Algo.getNode(i).getWeight()){
+//                if(maxWight == this.my_Graph_Algo.getNode(i).getWeight()){
+//                    doublesWithSameSumWight.add(maxIndexWight);
+//                }
+//                maxWight = this.my_Graph_Algo.getNode(i).getWeight();
+//                maxIndexWight = i;
+//            }
+//            if(this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(i)!= null && this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(i) != null){
+//                if((edgeInIndex <= this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(i).size()) && (edgeOutIndex <= this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(i).size())){
+//                    if(edgeInIndex+edgeOutIndex == this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(i).size()+ this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(i).size()){
+//                        doublesWithSameSumEdges.add(maxIndexEdges);
+//                    }
+//                    maxIndexEdges = i;
+//                    edgeInIndex = this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(i).size();
+//                    edgeOutIndex = this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(i).size();
+//                }
+//
+//            }
+//        }
+//        if(maxIndexWight == maxIndexEdges){
+//            NodeData center = new myNode(this.my_Graph_Algo.getNode(maxIndexEdges));
+//            return center;
+//        }
+//        double max = Double.max(this.my_Graph_Algo.getNode(maxIndexEdges).getWeight(),this.my_Graph_Algo.getNode(maxIndexWight).getWeight());
+//        if(max == this.my_Graph_Algo.getNode(maxIndexWight).getWeight()){
+//            return this.my_Graph_Algo.getNode(maxIndexWight);
+//        }
+//        return this.my_Graph_Algo.getNode(maxIndexEdges);
+        return this.my_Graph_Algo.getNode(index);
     }
 
-    /**
-     * Computes a list of consecutive nodes which go over all the nodes in cities.
-     * the sum of the weights of all the consecutive (pairs) of nodes (directed) is the "cost" of the solution -
-     * the lower the better.
-     * See: https://en.wikipedia.org/wiki/Travelling_salesman_problem
-     *
-     * @param cities
-     */
     @Override
     public List<NodeData> tsp(List<NodeData> cities) {
+        int src = cities.get(0).getKey();
+        int dest = cities.get(cities.size()-1).getKey();
+        int tmp = 0;
+        double sumWight = 0.0;
+        List<NodeData> listShortestPath = shortestPath(src, dest);
+        for(NodeData current : listShortestPath){
+            if(cities.contains(current)){
+                sumWight += current.getWeight();
+                tmp++;
+            }
+        }
+        double wight = shortestPathDist(src, dest);
+        if((sumWight != 0.0) && (sumWight <= wight) && (listShortestPath.size()-1==tmp)){
+            return listShortestPath;
+        }
         return null;
     }
 
-    /**
-     * Saves this weighted (directed) graph to the given
-     * file name - in JSON format
-     *
-     * @param file - the file name (may include a relative path).
-     * @return true - iff the file was successfully saved
-     */
     @Override
     public boolean save(String file) {
-        return false;
+        try {
+            File jsonGraph = new File(file);
+            if (jsonGraph.createNewFile()) {
+                System.out.println("File created: " + jsonGraph.getName());
+            } else {
+                System.err.println("The file not create");
+                return false;
+            }
+        } catch (IOException e) {
+            System.err.println("Error happened");
+            e.printStackTrace();
+            return false;
+        }
+        try {
+            FileWriter myWriter = new FileWriter(file);
+            String tmp = this.my_Graph_Algo.toString();
+            System.out.println(tmp);
+            myWriter.write(tmp);
+            myWriter.flush();
+            myWriter.close();
+            System.out.println("Successfully wrote to the file.");
+            return true;
+        } catch (IOException e) {
+            System.err.println("Error happened");
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    /**
-     * This method loads a graph to this graph algorithm.
-     * if the file was successfully loaded - the underlying graph
-     * of this class will be changed (to the loaded one), in case the
-     * graph was not loaded the original graph should remain "as is".
-     *
-     * @param file - file name of JSON file
-     * @return true - iff the graph was successfully loaded.
-     */
     @Override
     public boolean load(String file) {
-        return false;
+        boolean loaded = false;
+        try {
+            JSONParser parser = new JSONParser();
+            Object jsonA = parser.parse(new FileReader(file));
+            JSONObject jsonAll = (JSONObject) jsonA;
+            JSONArray jsonEdegs = (JSONArray) jsonAll.get("Edges");
+            JSONArray jsonNodes = (JSONArray) jsonAll.get("Nodes");
+            Iterator<JSONObject> nodes = jsonNodes.iterator();
+            Iterator<JSONObject> edegs = jsonEdegs.iterator();
+            DirectedWeightedGraph graph = new myGraph();
+            while (nodes.hasNext()) {
+                JSONObject tmp = nodes.next();
+                String point = (String) tmp.get("pos");
+                long dataId = (long) tmp.get("id");
+                if (point != null) {
+                    String[] dataPoint = point.split(",");
+                    if (dataPoint[0] != null && dataPoint[1] != null) {
+                            double x = Double.parseDouble(dataPoint[0]);
+                            double y = Double.parseDouble(dataPoint[1]);
+                            int id = (int) dataId;
+                            NodeData node = new myNode(id, x, y, 0.0);
+                            graph.addNode(node);
+                    }
+                }
+            }
+            while (edegs.hasNext()) {
+                JSONObject tmp = edegs.next();
+                long i = (long) tmp.get("src");
+                int dataSrc = (int) i;
+                double dataW = (double) tmp.get("w");
+                long j = (long) tmp.get("dest");
+                int dataDest = (int) j;
+                if (graph.getNode(dataSrc) != null && graph.getNode(dataDest) != null) {
+                    graph.connect(dataSrc, dataDest, dataW);
+                }
+            }
+            init(graph);
+            loaded = true;
+        } catch (ParseException s) {
+            s.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return loaded;
     }
 
     @Override
     public String toString() {
-        return "myGraphAlgo{" +
-                "\n my_Graph_Algo=" + my_Graph_Algo +
-                "\n myMc=" + myMc +
-                '}';
+        String myGraph = "{"+'"'+"Edges"+'"'+":" + "[\n";
+        Iterator<EdgeData> edges = this.my_Graph_Algo.edgeIter();
+        while (edges.hasNext()) {
+            EdgeData edge = edges.next();
+            myGraph = myGraph + "" + "{\n" + '"' + "src" + '"' + ": "+edge.getSrc()+",\n"+'"'+"w"+'"'+": "+edge.getWeight()+",\n"+'"'+"dest"+'"'+": "+edge.getDest()+"\n}"+",\n";
+        }
+        myGraph = myGraph.substring(0, myGraph.length() - 2) + "\n]";
+        myGraph = myGraph + ","+'"'+ "Nodes" + '"' + ": [\n";
+
+        Iterator<NodeData> nodes = this.my_Graph_Algo.nodeIter();
+        while (nodes.hasNext()) {
+            NodeData node = nodes.next();
+            myGraph = myGraph +"" + "{\n" + '"' + "pos" + '"' + ": " + '"'+node.getLocation().x()+","+node.getLocation().y()+'"'+",\n"+'"'+"id"+'"'+": "+node.getKey()+"\n}"+",\n";
+        }
+        myGraph = myGraph.substring(0, myGraph.length() - 2) + "\n]}";
+        return myGraph;
+    }
+
+    private HashMap<Vector<Integer>,Stack<Integer>> shortestRoutesWithMaxVertex() {
+        int index = 0;
+        HashMap<Vector<Integer>, Stack<Integer>> maxRouteNodes = new HashMap<>();
+        Vector<Double> tmp1 = average();
+        double averageWight = tmp1.get(0);
+        double sizeTmp = tmp1.get(1);
+        int size = (int) sizeTmp;
+        ArrayList<Vector<Integer>> keys = new ArrayList<>();
+        while (index < size) {
+            if (!((this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(index).isEmpty()) && (this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(index).isEmpty()))) {
+                if (this.my_Graph_Algo.getNode(index).getWeight() < averageWight) {
+                    ArrayList<Integer> srcTmpArray = this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(index);
+                    for (int i : srcTmpArray) {
+                        Stack<Integer> visited = new Stack<>();
+                        visited.add(index);
+                        visited.add(i);
+                        Stack<Integer> tmp = inRoute(visited, srcTmpArray);
+                        Vector<Integer> vertex = new Vector<>(2);
+                        vertex.add(index);
+                        vertex.add(tmp.size());
+                        if (tmp.size() != 2) {
+                            if ((tmp.size() >= maxRouteNodes.get(keys.get(index)).size())) {
+                                maxRouteNodes.computeIfAbsent(vertex, k -> new Stack<>());
+                                maxRouteNodes.put(vertex, tmp);
+                                if (keys.get(index) == vertex) {
+                                    keys.remove(index);
+                                    keys.add(index, vertex);
+                                } else {
+                                    keys.add(index, vertex);
+                                }
+                            }
+                        }
+                    }
+                }
+                index++;
+            } else {
+                Vector<Integer> vertex = new Vector<>(2);
+                vertex.add(index);
+                vertex.add(0);
+                maxRouteNodes.put(vertex, null);
+                index++;
+            }
+        }
+        return maxRouteNodes;
+    }
+
+    private Stack<Integer> inRoute( Stack<Integer> visited, ArrayList<Integer> srcOutArray) {
+        if(visited.size() <= this.my_Graph_Algo.nodeSize()){
+            for(int i : srcOutArray){
+                if(!(visited.contains(i))) {
+                    visited.add(i);
+                    visited = inRoute(visited, this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(i));
+                }
+            }
+            return visited;
+        }
+        return visited;
+    }
+
+    private Vector<Double> average(){
+        double average = 0.0;
+        double count = 0;
+        for(NodeData i : this.my_Graph_Algo.getVertex_Of_Graph()){
+            average += i.getWeight();
+            count++;
+        }
+        average = average/this.my_Graph_Algo.nodeSize();
+        Vector<Double> tmp = new Vector<>(2);
+        tmp.add(average);
+        tmp.add(count);
+        return tmp;
+    }
+
+    public double getWightTotal(int key, ArrayList<Integer> visited, double totalWight ){
+        if(visited.size() <= this.my_Graph_Algo.nodeSize() && (!visited.contains(key))){
+            if(this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(key) != null){
+                for(int inEdge : this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(key)){
+                    if(!visited.contains(inEdge)){
+                        totalWight += this.my_Graph_Algo.getNode(inEdge).getWeight();
+                        visited.add(inEdge);
+                        totalWight += getWightTotal(inEdge, visited,totalWight);
+                    }
+                }
+            }
+            if(this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(key) != null){
+                for(int outEdge : this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(key)){
+                    if(!visited.contains(outEdge)){
+                        totalWight += this.my_Graph_Algo.getNode(outEdge).getWeight();
+                        visited.add(outEdge);
+                        totalWight += getWightTotal(outEdge, visited,totalWight);
+                    }
+                }
+            }
+            return totalWight;
+        }
+        return totalWight;
     }
 }
-
-/////////////////////////////////////////////////////////////////////////////
-//@Override
-//public double shortestPathDist(int src, int dest) {
-//    if((!this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(src).isEmpty())&&(!this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(dest).isEmpty())){
-//        ArrayList<Double> minWight = new ArrayList<>();
-//        double tmp;
-//        if(this.my_Graph_Algo.getEdge(src, dest) != null){
-//            minWight.add(this.my_Graph_Algo.getEdge(src, dest).getWeight());
-//        }
-//        if(!((this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(dest).size()-1 == 0) || (this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(dest).contains(src)))){
-//            for(int i : this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(dest)){
-//                if(i != src){
-//                    if(((this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(i).size()-1 != 0)||(this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(i).contains(dest)))){
-//                        ArrayList <Integer> visited = new ArrayList<>(this.my_Graph_Algo.nodeSize());
-//                        visited.add(0,src);
-//                        visited.add(1,dest);
-//                        ArrayList<Integer> destTmpArray = this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(i);
-//                        visited.add(i);
-//                        tmp = this.my_Graph_Algo.getEdge(i,dest).getWeight();
-//                        tmp += inWight(visited, destTmpArray,i);
-//                        if(!(tmp == this.my_Graph_Algo.getEdge(i,dest).getWeight())){
-//                            minWight.add(tmp);
-//                        }
-//                    }
-//                }
-//            }
-//            if(minWight.size()>0){
-//                double min = Collections.min(minWight);
-//                return min;
-//            }
-//            return -1;
-//        }
-//    }
-//    return -1;
-//}
-//
-//    private double inWight( ArrayList<Integer> visited, ArrayList<Integer> destArrray, int destTmp) {
-//        double weight;
-//        if(visited.size() <= this.my_Graph_Algo.nodeSize()){
-//            for(int i : destArrray){
-//                if(!visited.contains(i)){
-//                    if(this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(i).contains(visited.get(0))){
-//                        weight =  this.my_Graph_Algo.getEdge(visited.get(0), i).getWeight() + this.my_Graph_Algo.getEdge(i,destTmp).getWeight();
-//                        visited.add(i);
-//                        return weight;
-//                    }
-//                    double tmp = this.my_Graph_Algo.getEdge(i, destTmp).getWeight();
-//                    tmp +=  outWight(i, visited, this.my_Graph_Algo.getNeighbors_Of_Vertex_in().get(i));
-//                    return tmp;
-//                }
-//                if((i == visited.get(0))){
-//                    double w = this.my_Graph_Algo.getEdge(visited.get(0), destTmp).getWeight();
-//                    return w;
-//                }
-//            }
-//        }
-//        return 0.0;
-//    }
-//
-//    private double outWight(int destTmp, ArrayList<Integer> visited, ArrayList<Integer> destArrray) {
-//        if (visited.size() <= this.my_Graph_Algo.nodeSize()) {
-//            visited.add(destTmp);
-//            for (int i : destArrray) {
-//                if (!visited.contains(i)) {
-//                    if (i == visited.get(0)) {
-//                        visited.add(i);
-//                        return this.my_Graph_Algo.getEdge(i, visited.get(0)).getWeight();
-//                    }
-//
-//                }
-//                visited.add(i);
-//                double tmp = this.my_Graph_Algo.getEdge(destTmp, i).getWeight();
-//                return tmp + inWight(visited, this.my_Graph_Algo.getNeighbors_Of_Vertex_out().get(i), i);
-//            }
-//            return 0.0;
-//        }
-//        return 0.0;
-//    }

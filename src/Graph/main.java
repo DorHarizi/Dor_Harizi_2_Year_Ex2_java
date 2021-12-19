@@ -1,17 +1,16 @@
 package Graph;
 
-import api.DirectedWeightedGraph;
 import api.DirectedWeightedGraphAlgorithms;
 import api.GeoLocation;
 import api.NodeData;
 
-import java.lang.reflect.Array;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         myGraph dor = new myGraph();
 
         double z = 0;
@@ -413,31 +412,71 @@ public class main {
         dor.connect(src79, dest79, w79);
         myGraphAlgo g = new myGraphAlgo();
         g.init(dor);
-        g.isConnected();
-        System.out.println(g.isConnected());
-        List <NodeData> arr = g.shortestPath(0,30);
-        for(int i=0; i <arr.size();i++){
-            System.out.println(arr.get(i).getKey() );
-        }
-        System.out.println(g.shortestPathDist(0,30));
-//        List<NodeData> arr;
-//        arr = g.shortestPath(0,8);
-//        for(int i=0;i<arr.size();i++){
-//            System.out.println(arr.get(i).getKey());
+//        String str = g.getGraph().getNode(0).getInfo();
+//        String [] arr;
+//        arr = str.split(",");
+//        System.out.println(Arrays.toString(arr));
+//        System.out.println(g.center().getKey());
+////        g.init(dor);
+//        DirectedWeightedGraphAlgorithms g1 = new myGraphAlgo();
+//        g1.load("C:/Users/dorha/IdeaProjects/Dor_Harizi_2_Year_Ex2_java/data/G2.json");
+//        g1.save( "my graPH.json");
+//
+//        System.out.println(g1);
+//        try {
+//            myGraphAlgo.load("data/G2.json");
 //        }
-
-
-
-
-
-
-
-
-
-
-
-
-
+//        catch(FileNotFoundException e){
+//            e.printStackTrace();
+//            System.out.println();
+//        }
+//        DirectedWeightedGraph g = new MyGraph(pd.getNodes(), pd.size);
+//        DirectedWeightedGraphAlgorithms algo = new Algorithms();
+//        algo.init(g);
+//        g = new graphGen().generate_connected_graph(2);
+//        algo.init(g);
+//        DirectedWeightedGraph g1 = algo.copy();
+//        System.out.println(g.toString());
+//        ArrayList <Integer> arr = dor.getNeighbors_Of_Vertex_out().get();
+//        for(NodeData i : arr){
+//            String tmp = i.getInfo();
+//            String [] vertexEdge =
+//        }
+//        int re=0;
+//        for(EdgeData i : dor.getEdge_Of_Graph().get(re)){
+//
+//        }
+//        double average = 0.0;
+//
+//        for(NodeData i : dor.getVertex_Of_Graph()){
+//            average += i.getWeight();
+//        }
+//        average = average/dor.nodeSize();
+//        System.out.println(average);
+//        for(NodeData i : dor.getVertex_Of_Graph()){
+//            if(i.getWeight() > average){
+//                System.out.println(i.getKey());
+//            }
+//        }
+//        g.isConnected();
+//        System.out.println(g.isConnected());
+//        List <NodeData> arr = g.shortestPath(0,1);
+//        for(int i=0; i <arr.size();i++){
+//            System.out.println(arr.get(i).getKey() );
+//        }
+//        System.out.println(g.shortestPathDist(0,30));
+        List<NodeData> arr = new ArrayList<>();
+        arr.add(node0);
+        arr.add(node4);
+        arr.add(node8);
+        arr.add(node2);
+        arr = g.tsp(arr);
+        for(int i=0;i<arr.size();i++){
+            System.out.println(arr.get(i).getKey());
+        }
+////
+        System.out.println(g.center());
+///////////////////////////////////////////////////////////////////////
 //        String n0 = dor.getNode(0).getInfo();
 //        int src = 1;
 //        int dest =
@@ -501,8 +540,5 @@ public class main {
 ////        n0.replaceAll("(" ,"");
 ////        char [] arr = n0.toCharArray();
 ////        System.out.println(Arrays.toString(arr));
-
-
-
     }
 }

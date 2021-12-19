@@ -362,13 +362,22 @@ public class myGraph implements DirectedWeightedGraph {
 
     @Override
     public String toString() {
-        return "myGraph{" +
-                "vertex_Of_Graph=" + vertex_Of_Graph +
-                "\n edge_Of_Graph=" + edge_Of_Graph +
-                "\n neighbors_Of_Vertex_out=" + neighbors_Of_Vertex_out +
-                "\n neighbors_Of_Vertex_in=" + neighbors_Of_Vertex_in +
-                "\n modeMc=" + modeMc +
-                '}';
+        String myGraph = "{"+'"'+"Edges"+'"'+":" + "[\n";        Iterator<EdgeData> edges = this.edgeIter();
+        while (edges.hasNext()) {
+            EdgeData edge = edges.next();
+            myGraph = myGraph + "" + "{\n" + '"' + "src" + '"' + ": "+edge.getSrc()+",\n"+'"'+"w"+'"'+": "+edge.getWeight()+",\n"+'"'+"dest"+'"'+": "+edge.getDest()+"\n}"+",\n";
+        }
+        myGraph = myGraph.substring(0, myGraph.length() - 2) + "\n]";
+        myGraph = myGraph + ","+'"'+ "Nodes" + '"' + ": [\n";
+
+        Iterator<NodeData> nodes = this.nodeIter();
+        while (nodes.hasNext()) {
+            NodeData node = nodes.next();
+            myGraph = myGraph +"" + "{\n" + '"' + "pos" + '"' + ": " + '"'+node.getLocation().x()+","+node.getLocation().y()+'"'+",\n"+'"'+"id"+'"'+": "+node.getKey()+"\n}"+",\n";
+        }
+        myGraph = myGraph.substring(0, myGraph.length() - 2) + "\n]}";
+        return myGraph;
+
     }
 
 }

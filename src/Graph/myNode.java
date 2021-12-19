@@ -10,6 +10,15 @@ public class myNode  implements NodeData {
     private String info;
     private int tag;
 
+    public myNode(int key, double x, double y, double z){
+        GeoLocation point = new myPoint3D(x, y, z);
+        this.key = key;
+        this.point = point;
+        this.weight = 0;
+        this.info = "";
+        this.tag = 0;
+    }
+
     public myNode(int key, GeoLocation point) {
         this.key = key;
         this.point = point;

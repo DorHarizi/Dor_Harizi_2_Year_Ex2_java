@@ -100,12 +100,6 @@ public class myEdgeData implements EdgeData {
 
     @Override
     public String toString() {
-        return "myEdgeData{" +
-                "src=" + src +
-                ", dest=" + dest +
-                ", weight=" + weight +
-                ", info='" + info + '\'' +
-                ", tag=" + tag +
-                '}';
+        return "{\n"+'"'+"src"+'"'+": "+src+",\n"+'"'+"w"+'"'+": "+weight+",\n"+'"'+"dest"+'"'+": "+dest+"\n}";
     }
 }

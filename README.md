@@ -1,36 +1,52 @@
 # Directed Weighted Graph Algorithms:                                                                
 ## Dor Harizi
 ---
-This project gives a response to the The problem of the placement of calls for elevators in a given building, so that the average for making each elevator call will be lower than possible. 
+In formal terms, a directed graph is an ordered pair G = (V, A) where 
+* V is a set whose elements are called vertices, nodes, or points;
+* A is a set of ordered pairs of vertices, called arcs, directed edges, arrows, or directed lines.
+
+It differs from an ordinary or undirected graph, in that the latter is defined in terms of unordered pairs of vertices, which are usually called edges, links or lines.
+
+The aforementioned definition does not allow a directed graph to have multiple arrows with the same source and target nodes, but some authors consider a broader definition that allows directed graphs to have such multiple arcs (namely, they allow the arc set to be a multiset). More specifically, these entities are addressed as directed multigraphs (or multidigraphs).
+On the other hand, the aforementioned definition allows a directed graph to have loops (that is, arcs that directly connect nodes with themselves), but some authors consider a narrower definition that doesn't allow directed graphs to have loops.[2] More specifically, directed graphs without loops are addressed as simple directed graphs, while directed graphs with loops are addressed as loop-digraphs (see section Types of directed graphs).
+
+Reference to the UML: [ click here](#Smart-Elevator-UML) 
 
 ---
 
 ## Algorithm features
+#### **init()**
+Inits the graph on which this set of algorithms operates on.
 
-*	Matching elevator is chosen based on the formula: state of the elevator + the expected time the elevator will travel from floor a to floor b
-*	If pickup call happens in the same direction as a previous call it is assigned to the elevator already having this path
-*	Elevator picks up the passengers only in the same direction which minimizes their travel time in case elevator is going way too far in opposite direction
-*	The Elevator's class will automatically create a matrix for each elevator. the matrix will represent the fastest time the elevator will travel from floor a to floor    b, and has a main rule in the allocation system
+#### **DirectedWeightedGraph()**
+Returns the underlying graph of which this class works.
 
-Reference to the UML: [ click here](#Smart-Elevator-UML)  
-Reference to how to use: [ click here](#How-to-use)
+#### **Copy()**
+Computes a deep copy of this weighted graph.
 
----
-## How to use the program:
-Clone the repository 
-```
-git clone https://github.com/DorHarizi/Dor_Harizi_2_Year_Ex1-oop_Python.git 
-```
-Run the program from the cmd: building file.json , call file.csv, output file.csv 
-```
-python Ex1.py <building_json_file_name> <calls_csv_file_name> <output_file_name>
-```
-----
-## Testing jar
-To get the reslut run the simulator Ex1_checker_V1.2_obf.jar
-```
-java -jar Ex1_checker_V1.2_obf.jar <ID, building.json, calls.csv, out.log>
-```
+#### **isConnected()** 
+Returns true if and only if (iff) there is a valid path from each node to each
+other node. 
+NOTE: assume directional graph (all n*(n-1) ordered pairs).
+
+#### **shortestPathDist()**
+return the min wight of the shortest path between two points in the graph.
+
+#### **shortestPath()**
+In graph theory, the shortest path problem is the problem of finding a path between two vertices (or nodes) in a graph such that the sum of the weights of its constituent edges is minimized.
+The problem of finding the shortest path between two intersections on a road map may be modeled as a special case of the shortest path problem in graphs, where the vertices correspond to intersections and the edges correspond to road segments, each weighted by the length of the segment.
+#### **center()**
+ Return the Node the represnt the center of mass of the graph.
+
+#### **tsp()**
+TSP can be modelled as an undirected weighted graph, such that cities are the graph's vertices, paths are the graph's edges, and a path's distance is the edge's weight. It is a minimization problem starting and finishing at a specified vertex after having visited each other vertex exactly once. Often, the model is a complete graph. If no path exists between two cities, adding a sufficiently long edge will complete the graph without affecting the optimal tour.
+
+#### **save()**
+ Saves this weighted directed graph to the given
+ file name - in JSON format.
+#### **load()**
+This method loads a graph to this graph algorithm.
+param file - file name of JSON file
 
 ---
 ## Smart Elevator UML:
@@ -38,20 +54,4 @@ java -jar Ex1_checker_V1.2_obf.jar <ID, building.json, calls.csv, out.log>
 <p align="center">
     <img width="800" height="900" src="https://github.com/DorHarizi/Dor_Harizi_2_Year_Ex2_java/blob/master/src/Graph/UML.png">
    </p>
-   
----
-
-## Results for the avarage waiting time: 
-
-|           | **B1** | **B2** | **B3** | **B4** | **B5** |
-|-----------|--------|--------|--------|--------|--------|
-|**Calls_a**|	112.9	 | 68.69  | 54.44  | 66     |	26.7   |
-|**Calls_b**|		     |        | 762.2  | 785.6  |	469.2  |
-|**Calls_c**|		     |        | 775.8  | 831.1  |	505    |
-|**Calls_d**|		     |        | 775.8  | 831.1  |	505    |  
-
- *The buildings B1, B2 can be tested only on calls_a*
- 
- *Values were rounded to 1 digit after the decimal point.*
- 
  ---
